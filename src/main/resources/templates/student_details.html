@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Детали студента</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 5px; width: 400px; }
+    </style>
+</head>
+<body>
+<h1>Карточка студента</h1>
+<div class="card" th:object="${selectedStudent}">
+    <p><strong>ID:</strong> <span th:text="*{id}"></span></p>
+    <p><strong>ФИО:</strong> <span th:text="*{lastName + ' ' + firstName + ' ' + middleName}"></span></p>
+    <p><strong>Город:</strong> <span th:text="*{city}"></span></p>
+    <p><strong>Пол:</strong> <span th:text="*{gender}"></span></p>
+    <p><strong>Возраст:</strong> <span th:text="*{age}"></span></p>
+    <p><strong>Группа:</strong> <span th:text="*{studentGroup}"></span></p>
+    <p><strong>Факультет:</strong> <span th:text="*{faculty}"></span></p>
+</div>
+<br/>
+<a th:href="@{/students/main}">Назад к списку</a>
+</body>
+</html>

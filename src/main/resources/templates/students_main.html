@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Список студентов</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .btn { padding: 5px 10px; text-decoration: none; border-radius: 3px; display: inline-block; }
+        .btn-add { background-color: #28a745; color: white; margin-bottom: 10px; }
+        .btn-info { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #28a745; color: white; }
+    </style>
+</head>
+<body>
+<h1>Студенты</h1>
+<a th:href="@{/students/create}" class="btn btn-add">Добавить студента</a>
+<a th:href="@{/enrollees/main}" class="btn btn-info" style="background-color: #6c757d;">Абитуриенты</a>
+
+<span th:if="${students.size() == 0}">Список студентов пуст.</span>
+
+<table th:if="${students.size() > 0}">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>ФИО</th>
+        <th>Факультет</th>
+        <th>Группа</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="s : ${students}">
+        <td th:text="${s.id}"></td>
+        <td th:text="${s.lastName + ' ' + s.firstName + ' ' + s.middleName}"></td>
+        <td th:text="${s.faculty}"></td>
+        <td th:text="${s.studentGroup}"></td>
+        <td>
+            <a th:href="@{'/students/details/' + ${s.id}}" class="btn btn-info">Детали</a>
+            <a th:href="@{'/students/update/' + ${s.id}}" class="btn btn-info" style="background-color: #ffc107; color: black;">Редактировать</a>
+            <a th:href="@{'/students/delete/' + ${s.id}}" class="btn btn-danger">Удалить</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

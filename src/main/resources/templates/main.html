@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Список абитуриентов</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .btn { padding: 5px 10px; text-decoration: none; border-radius: 3px; display: inline-block; }
+        .btn-add { background-color: #28a745; color: white; margin-bottom: 10px; }
+        .btn-info { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #28a745; color: white; }
+    </style>
+</head>
+<body>
+<h1>Абитуриенты</h1>
+<a th:href="@{/enrollees/create}" class="btn btn-add">Добавить абитуриента</a>
+
+<span th:if="${enrollees.size() == 0}">Список абитуриентов пуст.</span>
+
+<table th:if="${enrollees.size() > 0}">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>ФИО</th>
+        <th>Пол</th>
+        <th>Проходной балл</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="e : ${enrollees}">
+        <td th:text="${e.id}"></td>
+        <td th:text="${e.lastName + ' ' + e.firstName + ' ' + e.middleName}"></td>
+        <td th:text="${e.gender}"></td>
+        <td th:text="${e.passingScore}"></td>
+        <td>
+            <a th:href="@{'/enrollees/details/' + ${e.id}}" class="btn btn-info">Детали</a>
+            <a th:href="@{'/enrollees/update/' + ${e.id}}" class="btn btn-info" style="background-color: #ffc107; color: black;">Редактировать</a>
+            <a th:href="@{'/enrollees/delete/' + ${e.id}}" class="btn btn-danger">Удалить</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

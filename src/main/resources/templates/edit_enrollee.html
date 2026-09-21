@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Форма абитуриента</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="date"] { width: 300px; padding: 6px; }
+        .btn-save { background-color: #28a745; color: white; border: none; padding: 8px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>Сохранение данных абитуриента</h1>
+<form th:action="@{/enrollees/save}" th:object="${enrollee}" method="post">
+
+    <input type="hidden" th:field="*{id}"/>
+
+    <div class="form-group">
+        <label>Фамилия:</label>
+        <input type="text" th:field="*{lastName}" required/>
+    </div>
+    <div class="form-group">
+        <label>Имя:</label>
+        <input type="text" th:field="*{firstName}" required/>
+    </div>
+    <div class="form-group">
+        <label>Отчество:</label>
+        <input type="text" th:field="*{middleName}"/>
+    </div>
+    <div class="form-group">
+        <label>Пол:</label>
+        <input type="text" th:field="*{gender}"/>
+    </div>
+    <div class="form-group">
+        <label>Национальность:</label>
+        <input type="text" th:field="*{nationality}"/>
+    </div>
+    <div class="form-group">
+        <label>Дата рождения:</label>
+        <input type="date" th:field="*{birthDate}"/>
+    </div>
+    <div class="form-group">
+        <label>Оценки по экзаменам:</label>
+        <input type="text" th:field="*{examScores}" placeholder="Предметы и баллы"/>
+    </div>
+    <div class="form-group">
+        <label>Проходной балл:</label>
+        <input type="number" th:field="*{passingScore}"/>
+    </div>
+
+    <button type="submit" class="btn-save">Сохранить</button>
+    <a th:href="@{/enrollees/main}">Назад к списку</a>
+</form>
+</body>
+</html>
