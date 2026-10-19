@@ -1,0 +1,136 @@
+opencollection: 1.0.0
+info:
+  name: Lab4_Enrollees
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ''
+      port: ''
+      auth:
+        username: ''
+        password: ''
+      bypassProxy: ''
+items:
+  - info:
+      name: Изменение
+      type: http
+      seq: 3
+    http:
+      method: PUT
+      url: http://localhost:8080/api/enrollees/1
+      body:
+        type: json
+        data: |-
+          {
+            "lastName": "Сидоров",
+            "firstName": "Сидор",
+            "middleName": "Сидорович",
+            "gender": "Мужской",
+            "nationality": "Русский",
+            "birthDate": "2007-03-20",
+            "passingScore": 300,
+            "zipCode": "602200",
+            "country": "Россия", 
+            "city": "Муром",
+            "street": "Московская",
+            "house": "40",
+            "apartment": "12"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: Поиск
+      type: http
+      seq: 5
+    http:
+      method: GET
+      url: http://localhost:8080/api/enrollees?searchType=score&keyword=250
+      params:
+        - name: searchType
+          value: score
+          type: query
+        - name: keyword
+          value: '250'
+          type: query
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: Получить всех
+      type: http
+      seq: 1
+    http:
+      method: GET
+      url: http://localhost:8080/api/enrollees
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: Создание
+      type: http
+      seq: 2
+    http:
+      method: POST
+      url: http://localhost:8080/api/enrollees
+      body:
+        type: json
+        data: |-
+          {
+            "lastName": "Сидоров",
+            "firstName": "Сидор",
+            "middleName": "Сидорович",
+            "gender": "Мужской",
+            "nationality": "Русский",
+            "birthDate": "2007-03-20",
+            "passingScore": 260,
+            "zipCode": "602200",
+            "country": "Россия", 
+            "city": "Муром",
+            "street": "Московская",
+            "house": "40",
+            "apartment": "12"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+  - info:
+      name: Удаление
+      type: http
+      seq: 4
+    http:
+      method: DELETE
+      url: http://localhost:8080/api/enrollees/4
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+      forwardAuthorizationHeader: false
+bundled: true
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    exportedAt: '2026-10-19T18:15:34.572Z'
+    exportedUsing: Bruno
