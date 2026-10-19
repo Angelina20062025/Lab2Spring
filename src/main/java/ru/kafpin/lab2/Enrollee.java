@@ -1,5 +1,6 @@
 package ru.kafpin.lab2;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import jakarta.persistence.*;
@@ -44,6 +45,7 @@ public class Enrollee {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "enrollee", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<ExamScore> examScores = new ArrayList<>();
 

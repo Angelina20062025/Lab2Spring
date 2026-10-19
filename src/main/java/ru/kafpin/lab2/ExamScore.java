@@ -1,5 +1,6 @@
 package ru.kafpin.lab2;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import jakarta.validation.constraints.*;
@@ -18,6 +19,7 @@ public class ExamScore {
     @Max(value = 100, message = "Максимальный балл - 100")
     private int score;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enrollee_id", nullable = false)
     private Enrollee enrollee;
