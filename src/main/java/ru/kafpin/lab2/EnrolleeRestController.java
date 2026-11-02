@@ -1,6 +1,5 @@
 package ru.kafpin.lab2;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,7 +52,8 @@ public class EnrolleeRestController {
     @GetMapping("/{id}")
     public EnrolleeDTO getEnrolleeById(@PathVariable("id") Long id) {
         Enrollee enrollee = enrolleeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Абитуриент с ID " + id + " не найден"));
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Абитуриент не найден"));
         return new EnrolleeDTO(enrollee);
     }
 
@@ -89,7 +89,8 @@ public class EnrolleeRestController {
     @PutMapping("/{id}")
     public EnrolleeDTO updateEnrollee(@PathVariable("id") Long id, @RequestBody @Valid EnrolleeDTO dto) {
         Enrollee enrollee = enrolleeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Абитуриент с ID " + id + " не найден"));
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Абитуриент не найден"));
 
         enrollee.setLastName(dto.getLastName());
         enrollee.setFirstName(dto.getFirstName());
@@ -109,16 +110,16 @@ public class EnrolleeRestController {
         enrollee.getAddress().setHouse(dto.getHouse());
         enrollee.getAddress().setApartment(dto.getApartment());
 
-        Enrollee updatedEnrollee = enrolleeRepository.save(enrollee);
-        return new EnrolleeDTO(updatedEnrollee);
+        enrolleeRepository.update(enrollee);
+        return new EnrolleeDTO(enrollee);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEnrollee(@PathVariable("id") Long id) {
-        if (!enrolleeRepository.existsById(id)) {
-            throw new EntityNotFoundException("Абитуриент с ID " + id + " не найден");
-        }
+        enrolleeRepository.findById(id)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "Абитуриент не найден"));
         enrolleeRepository.deleteById(id);
     }
 }

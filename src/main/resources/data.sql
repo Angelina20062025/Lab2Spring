@@ -21,9 +21,3 @@ VALUES ('Математика', 95, 2);
 
 INSERT INTO exam_scores (subject, score, enrollee_id)
 VALUES ('Физика', 90, 2);
-
-INSERT INTO students (last_name, first_name, middle_name, city, gender, age, student_group, faculty)
-VALUES ('Михайлов', 'Михаил', 'Петрович', 'Владимир', 'Мужской', 20, 'ПИН-123', 'Программная инженерия');
-
-INSERT INTO students (last_name, first_name, middle_name, city, gender, age, student_group, faculty)
-VALUES ('Козлова', 'Мария', 'Игоревна', 'Муром', 'Женский', 19, 'ИС-124', 'Информационные системы');

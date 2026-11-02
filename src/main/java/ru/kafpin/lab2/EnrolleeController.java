@@ -100,11 +100,11 @@ public class EnrolleeController {
 //        return "redirect:/enrollees/main";
 //    }
 
-    @GetMapping("/delete/{id}")
-    public String deleteEnrollee(@PathVariable("id") Long id) {
-        if (enrolleeRepository.existsById(id)) {
-            enrolleeRepository.deleteById(id);
-        }
-        return "redirect:/enrollees/main";
-    }
+//    @GetMapping("/delete/{id}")
+//    public String deleteEnrollee(@PathVariable("id") Long id) {
+//        if (enrolleeRepository.existsById(id)) {
+//            enrolleeRepository.deleteById(id);
+//        }
+//        return "redirect:/enrollees/main";
+//    }
 }

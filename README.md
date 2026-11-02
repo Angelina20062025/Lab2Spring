@@ -1,3 +1,49 @@
+# Лабораторная работа №5. Работа с реляционными БД через JdbcTemplate
+
+## Цель работы
+Реализовать слой доступа к данным для приложения управления абитуриентами с использованием `JdbcTemplate`, написать собственные SQL-запросы, `RowMapper` и методы сохранения/обновления/удаления сущностей.
+
+## Архитектура проекта
+- **Стек:** Spring Boot 3, Spring JDBC, Maven, Hibernate Validator.
+- **СУБД:** H2
+- **Основные слои:**
+    - **REST Controller (Endpoints):** Класс `EnrolleeRestController` принимает HTTP-запросы, выполняет валидацию входящих DTO и возвращает JSON-ответы клиенту.
+    - **Data Transfer Object (DTO):** Класс `EnrolleeDTO` - представление сущностей `Enrollee` и `Address`.
+    - **Repository (Доступ к данным):** Класс `EnrolleeRepository` - реализует CRUD и поиск вручную через `JdbcTemplate`: `query`, `queryForObject`, `update`, `GeneratedKeyHolder` для получения сгенерированных ключей.
+    - **RowMapper (Маппинг):** Класс `EnrolleeMapper` реализует `RowMapper<Enrollee>` и преобразует строку `ResultSet` (результат `LEFT JOIN` таблиц `enrollees` и `addresses`) в объект `Enrollee` со вложенным `Address`.
+    - **Entity (Модели данных):** Сущности `Enrollee`, `Address`, `ExamScore` - POJO без JPA-аннотаций (геттеры, сеттеры, конструкторы).
+    - **Инициализация схемы:** Файлы `schema.sql` (создание таблиц `addresses`, `enrollees`, `exam_scores` с внешними ключами) и `data.sql` (тестовые данные) в `src/main/resources`.
+- **Ключевые аннотации:**
+    - `@Repository` - объявление класса `EnrolleeRepository` как бина слоя доступа к данным.
+    - `@RestController`, `@RequestMapping` - объявление REST-контроллера и базового пути `/api/enrollees`.
+    - `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping` - маппинг HTTP-методов на endpoints контроллера.
+    - `@PathVariable` - извлечение `id` из URI.
+    - `@RequestParam` - чтение параметров фильтрации `searchType` и `keyword`.
+    - `@RequestBody` - связывание JSON-тела запроса с объектном `EnrolleeDTO`.
+    - `@Valid` - запуск валидации полей DTO (Bean Validation).
+    - `@ResponseStatus` - явное задание HTTP-кода ответа (`201 CREATED`, `204 NO_CONTENT`).
+    - `@Autowired` - внедрение `EnrolleeRepository` в контроллер (репозиторий получает `JdbcTemplate` через конструктор).
+- **Описание моделей данных и DTO:**
+    - **`Enrollee` (Entity):** POJO абитуриента: `id`, ФИО, пол, национальность, дата рождения, проходной балл, вложенный `Address` и список `ExamScore`.
+    - **`Address` (Entity):** POJO адреса: `id`, индекс, страна, город, улица, дом, квартира. Связан с `Enrollee` через `address_id` (внешний ключ в таблице `enrollees`).
+    - **`ExamScore` (Entity):** POJO оценки: `id`, предмет, балл, `enrollee_id`.
+    - **`EnrolleeDTO` (DTO):** Контейнер, объединяющий поля `Enrollee` и `Address` (`zipCode`, `country`, `city`, `street`, `house`, `apartment`).
+
+## Алгоритм работы
+1. **Инициализация схемы и данных:** при старте приложения Spring JDBC выполняет `schema.sql`, создавая таблицы `addresses`, `enrollees` и `exam_scores` с внешними ключами, затем `data.sql` наполняет их тестовыми записями.
+2. **Получение списка с фильтрацией (`GET /api/enrollees`):** Контроллер анализирует параметры `searchType` и `keyword` и вызывает соответствующий метод репозитория:
+    - `findByLastName` - поиск по фамилии через `LOWER(...) LIKE LOWER(?)`;
+    - `findByAddressCity` - поиск по городу через `JOIN` с таблицей адресов;
+    - `findByPassingScoreGreaterThanEqual` - поиск по проходному баллу `>=`.
+      Все методы используют единый `JOIN_QUERY` с `LEFT JOIN addresses` и `EnrolleeMapper`, что избавляет от проблемы N+1 запросов. Результаты преобразуются в `List<EnrolleeDTO>` через Stream API и сериализуются Jackson в JSON-массив.
+3. **Получение по id (`GET /api/enrollees/{id}`):** репозиторий выполняет `JOIN_QUERY + " WHERE e.id = ?"` и возвращает `Optional<Enrollee>` (через `list.stream().findFirst()`). Если запись отсутствует, выбрасывается `ResponseStatusException` со статусом `404 NOT FOUND`. Найденная сущность оборачивается в DTO и возвращается с кодом `200 OK`.
+4. **Создание сущности (`POST /api/enrollees`):** входящий JSON валидируется (`@Valid`). Контроллер вручную переносит поля DTO в новые объекты `Enrollee` и `Address`. В `EnrolleeRepository.save()`:
+    - выполняется `INSERT INTO addresses(...)` через `PreparedStatement` с `Statement.RETURN_GENERATED_KEYS`, сгенерированный `address_id` извлекается из `GeneratedKeyHolder` и проставляется в объект `Address`;
+    - выполняется `INSERT INTO enrollees(...)` с передачей `address_id` (или `NULL` через `ps.setNull`, если адреса нет), и сгенерированный `id` абитуриента записывается обратно в объект.
+      Метод возвращает сохранённый объект в виде DTO со статусом `201 CREATED`.
+5. **Обновление данных (`PUT /api/enrollees/{id}`):** контроллер находит существующую запись через `findById`, обновляет поля сущности и вложенного адреса из DTO. В `EnrolleeRepository.update()` выполняются два `UPDATE`-запроса через `jdbcTemplate.update(...)`: сначала обновление строки в `addresses` по `address.id`, затем обновление строки в `enrollees` по `enrollee.id`. Клиенту возвращается обновлённый JSON.
+6. **Удаление записи (`DELETE /api/enrollees/{id}`):** контроллер проверяет наличие записи через `findById` (иначе `404`). В `EnrolleeRepository.deleteById()` сначала удаляется связанный адрес (`DELETE FROM addresses WHERE id = ?`), затем сам абитуриент (`DELETE FROM enrollees WHERE id = ?`). Клиенту возвращается пустой ответ со статусом `204 NO_CONTENT`.
+
 # Лабораторная работа №4. Разработка REST API
 ## Цель работы
 Создание Spring Boot приложения с поддержкой REST API для управления данными абитуриентов, реализация полноценных CRUD-операций, возвращающих JSON-объекты, с использованием промежуточного слоя DTO (Data Transfer Object).
